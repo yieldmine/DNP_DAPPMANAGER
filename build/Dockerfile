@@ -97,13 +97,13 @@ RUN echo "127.0.0.1 localunixsocket"
 
 #Install ZeroNet
 RUN apk --no-cache --no-progress add python3 python3-dev gcc libffi-dev musl-dev make tor openssl git supervisor bash\
- && git clone https://github.com/HelloZeroNet/ZeroNet.git /usr/src/app/ZeroNet \
- && pip3 install -r /usr/src/app/ZeroNet/requirements.txt \
+ && git clone https://github.com/HelloZeroNet/ZeroNet.git /usr/src/app/zeronet \
+ && pip3 install -r /usr/src/app/zeronet/requirements.txt \
  && apk del python3-dev gcc libffi-dev musl-dev make git \
  && echo "ControlPort 9051" >> /etc/tor/torrc \
  && echo "CookieAuthentication 1" >> /etc/tor/torrc
 
-ADD build/zeronet.conf /etc/zeronet.conf
+ADD build/zeronet.conf /usr/src/app/zeronet/zeronet.conf
 ADD build/supervisord.conf /etc/supervisord.conf
 
 CMD [ "supervisord", "-c", "/etc/supervisord.conf"]
