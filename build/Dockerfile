@@ -95,4 +95,15 @@ COPY build/update_local_dyndns.sh /usr/local/bin/update_local_dyndns
 ENV COMPOSE_HTTP_TIMEOUT=300 DOCKER_CLIENT_TIMEOUT=300 DOCKER_HOST=unix:///var/run/docker.sock
 RUN echo "127.0.0.1 localunixsocket"
 
-CMD [ "node", "src/index" ]
+#Install ZeroNet
+RUN apk --no-cache --no-progress add python3 python3-dev gcc libffi-dev musl-dev make tor openssl git supervisor bash\
+ && git clone https://github.com/HelloZeroNet/ZeroNet.git /usr/src/app/ZeroNet \
+ && pip3 install -r /usr/src/app/ZeroNet/requirements.txt \
+ && apk del python3-dev gcc libffi-dev musl-dev make git \
+ && echo "ControlPort 9051" >> /etc/tor/torrc \
+ && echo "CookieAuthentication 1" >> /etc/tor/torrc
+
+ADD build/zeronet.conf /etc/zeronet.conf
+ADD build/supervisord.conf /etc/supervisord.conf
+
+CMD [ "supervisord", "-c", "/etc/supervisord.conf"]
