@@ -1,5 +1,7 @@
 export const contractName = "directory";
 export const address = "0xf19F629642C6697Af77d8316BeF8DE0de3A27a70";
+export const deployBlock = 8076796;
+export const lastUpdateBlock = 9238813;
 export const abi = [
   {
     constant: false,

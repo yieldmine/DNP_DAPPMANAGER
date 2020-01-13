@@ -56,7 +56,8 @@
     "tweetnacl": "^1.0.1",
     "tweetnacl-util": "^0.15.0",
     "web3": "^1.0.0-beta.55",
-    "winston": "^3.0.0"
+    "winston": "^3.0.0",
+    "zeroframe-ws-client": "dapplion/ZeroFrameJS#websocket_close"
   },
   "devDependencies": {
     "@types/async": "^3.0.1",

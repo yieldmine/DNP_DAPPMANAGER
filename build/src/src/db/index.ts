@@ -1,5 +1,6 @@
 export * from "./autoUpdateSettings";
 export * from "./cache";
+export * from "./directory";
 export * from "./dyndns";
 export * from "./fileTransferPath";
 export * from "./isInstalling";

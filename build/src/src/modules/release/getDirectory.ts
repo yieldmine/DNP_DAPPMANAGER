@@ -1,6 +1,7 @@
 import { isEnsDomain } from "../../utils/validate";
 import { DirectoryDnp, DirectoryDnpStatus } from "../../types";
 import * as directoryContract from "../../contracts/directory";
+import { max } from "lodash";
 import web3 from "../web3Setup";
 import Logs from "../../logs";
 import { notUndefined } from "../../utils/typingHelpers";
@@ -12,6 +13,37 @@ const DAppNodePackageStatus: DirectoryDnpStatus[] = [
   "Active",
   "Developing"
 ];
+
+let lastBlockChecked = directoryContract.lastUpdateBlock;
+let lastUpdateTimestamp = 0;
+
+/**
+ * Returns the latest timestamp at which the DAppNode APM directory
+ * smart contract was updated. Checks all its events and queries the latest
+ */
+export async function getLastDirectoryUpdateTimestamp() {
+  const directory = new web3.eth.Contract(
+    directoryContract.abi,
+    directoryContract.address
+  );
+  const events = await directory.getPastEvents("allEvents", {
+    fromBlock: lastBlockChecked,
+    toBlock: "latest"
+  });
+
+  if (events.length) {
+    const updateBlockNum = max(events.map(event => event.blockNumber));
+    if (updateBlockNum) {
+      const updateBlock = await web3.eth.getBlock(updateBlockNum);
+      lastUpdateTimestamp = updateBlock.timestamp;
+    }
+  }
+
+  // Update cache
+  lastBlockChecked = await web3.eth.getBlockNumber();
+
+  return lastUpdateTimestamp;
+}
 
 /**
  * Fetches all package names in the custom dappnode directory.

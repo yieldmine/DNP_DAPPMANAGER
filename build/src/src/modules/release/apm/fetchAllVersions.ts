@@ -1,4 +1,5 @@
 import semver from "semver";
+import memoize from "memoizee";
 import web3 from "../../web3Setup";
 import fetchRepoAddress from "./fetchRepoAddress";
 import { ApmVersion } from "../../../types";
@@ -6,6 +7,21 @@ import * as repoContract from "../../../contracts/repository";
 import parseResult from "./parseResult";
 import Logs from "../../../logs";
 const logs = Logs(module);
+
+/**
+ * Cache the result of a version ID of an APM, it's a permanent result
+ */
+const fetchVersionById = memoize(
+  async (repoAddr: string, i: number) => {
+    const repo = new web3.eth.Contract(repoContract.abi, repoAddr);
+    const res = await repo.methods.getByVersionId(i).call();
+    // semanticVersion = [1, 0, 8]. It is joined to form a regular semver string
+    return parseResult(res);
+  },
+  { promise: true }
+);
+
+const fetchRepoAddressMem = memoize(fetchRepoAddress, { promise: true });
 
 /**
  * Versions
@@ -21,7 +37,7 @@ export default async function fetchAllVersions(
   // If verReq is not provided or invalid, default to all versions
   if (!verReq || semver.validRange(verReq)) verReq = "*";
 
-  const repoAddr = await fetchRepoAddress(name);
+  const repoAddr = await fetchRepoAddressMem(name);
   const repo = new web3.eth.Contract(repoContract.abi, repoAddr);
 
   const versionCount = parseFloat(await repo.methods.getVersionsCount().call());
@@ -44,9 +60,7 @@ export default async function fetchAllVersions(
   await Promise.all(
     versionIndexes.map(async i => {
       try {
-        const res = await repo.methods.getByVersionId(i).call();
-        // semanticVersion = [1, 0, 8]. It is joined to form a regular semver string
-        allVersions.push(parseResult(res));
+        allVersions.push(await fetchVersionById(repoAddr, i));
       } catch (e) {
         // If you request an inexistent ID to the contract, web3 will throw
         // Error: couldn't decode uint16 from ABI. The try, catch block will catch that

@@ -1,7 +1,17 @@
 import web3 from "../../web3Setup";
+import memoize from "memoizee";
 import { isEnsDomain } from "../../../utils/validate";
 import * as ensContract from "../../../contracts/ens";
 import * as publicResolverContract from "../../../contracts/publicResolver";
+
+/**
+ * Cache this result since it should never change
+ * TTL of 1 hour just in case
+ */
+export default memoize(fetchRepoAddress, {
+  promise: true,
+  maxAge: 60 * 60 * 1000
+});
 
 function namehash(name: string): string {
   let node =
@@ -15,9 +25,7 @@ function namehash(name: string): string {
   return node.toString();
 }
 
-export default async function fetchRepoAddress(
-  repoName: string
-): Promise<string> {
+async function fetchRepoAddress(repoName: string): Promise<string> {
   // Validate the provided name, it only accepts .eth domains
   if (!isEnsDomain(repoName)) throw Error(`repoName must be an ENS domain`);
 
