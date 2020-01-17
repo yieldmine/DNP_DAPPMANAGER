@@ -1,4 +1,4 @@
-import { dynamicKeyValidate } from "./dbCache";
+import { dynamicKey } from "./dbCache";
 import { Manifest, ApmVersion, ComposeUnsafe } from "../types";
 import semver from "semver";
 import { joinWithDot, stripDots } from "./dbUtils";
@@ -19,7 +19,7 @@ const manifestCacheValidate = (hash: string, manifest?: Manifest): boolean => {
   );
 };
 
-export const manifestCache = dynamicKeyValidate<Manifest, string>(
+export const manifestCache = dynamicKey<Manifest, string>(
   manifestCacheKeyGetter,
   manifestCacheValidate
 );
@@ -39,7 +39,7 @@ const apmCacheValidate = (
       (!apmVersion || apmVersion.version === version)
   );
 
-export const apmCache = dynamicKeyValidate<ApmVersion, ApmKeyArg>(
+export const apmCache = dynamicKey<ApmVersion, ApmKeyArg>(
   apmCacheKeyGetter,
   apmCacheValidate
 );
@@ -55,7 +55,7 @@ const composeCacheValidate = (
   return typeof hash === "string" && (!compose || typeof compose === "object");
 };
 
-export const composeCache = dynamicKeyValidate<ComposeUnsafe, string>(
+export const composeCache = dynamicKey<ComposeUnsafe, string>(
   composeCacheKeyGetter,
   composeCacheValidate
 );
@@ -68,7 +68,7 @@ const ipfsCacheValidate = (hash: string, content?: string): boolean => {
   return typeof hash === "string" && (!content || typeof content === "string");
 };
 
-export const ipfsCache = dynamicKeyValidate<string, string>(
+export const ipfsCache = dynamicKey<string, string>(
   ipfsCacheKeyGetter,
   ipfsCacheValidate
 );

@@ -5,8 +5,6 @@ import {
   RawRelease
 } from "../../watchers/directory/temp-types";
 
-// Registry address
-const zeronetDappnodeRegistryAddress = "1kNwQrJwCtkAa3zBF44LggEirS2j8jciA";
 // Path settings
 const registryPath = "registry.json";
 const releasesPath = "releases.json";
@@ -14,8 +12,12 @@ const releasesPath = "releases.json";
 /**
  * Fetches the DAppNode directory from ZeroNet
  */
-export async function fetchRegistryZeronet(): Promise<RawDirectory> {
-  const zeroframe = ZeroFrame(zeronetDappnodeRegistryAddress);
+export async function fetchRegistryZeronet(
+  address: string
+): Promise<RawDirectory> {
+  await ensureRegistryAvailableZeronet();
+
+  const zeroframe = ZeroFrame(address);
   const siteInfo = await zeroframe.siteInfo();
   const registry = await zeroframe.fileGetJson<RawDirectoryPackage[]>(
     registryPath

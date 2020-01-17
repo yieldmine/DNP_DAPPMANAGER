@@ -1,4 +1,4 @@
-import { dynamicKeyValidate } from "./dbCache";
+import { dynamicKey } from "./dbCache";
 import { joinWithDot, stripDots } from "./dbUtils";
 
 const PACKAGE_IS_INSTALLING = "package-is-installing";
@@ -15,7 +15,7 @@ const packageIsInstallingKeyGetter = (dnpName: string): string =>
  *   as a timeout to allow installation retries even if the packages
  *   are not unflagged correctly
  */
-export const packageIsInstalling = dynamicKeyValidate<number, string>(
+export const packageIsInstalling = dynamicKey<number, string>(
   packageIsInstallingKeyGetter,
   () => true
 );

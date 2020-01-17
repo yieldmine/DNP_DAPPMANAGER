@@ -28,3 +28,11 @@ export function formatKey(key: string): string {
   if (key.includes("ipfs/")) return key.split("ipfs/")[1];
   return key;
 }
+
+/**
+ * Simple validate function for `dynamicKey` to make sure
+ * the value is not stringified
+ */
+export function validateIsObject<T>(id: string, value?: T): boolean {
+  return typeof id === "string" && (!value || typeof value === "object");
+}

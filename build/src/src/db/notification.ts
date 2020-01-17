@@ -1,4 +1,4 @@
-import { dynamicKeyValidate, staticKey } from "./dbCache";
+import { dynamicKey, staticKey } from "./dbCache";
 import { PackageNotification } from "../types";
 import { joinWithDot } from "./dbUtils";
 
@@ -16,7 +16,7 @@ const notificationValidate = (
   );
 };
 
-export const notification = dynamicKeyValidate<PackageNotification, string>(
+export const notification = dynamicKey<PackageNotification, string>(
   notificationKeyGetter,
   notificationValidate
 );

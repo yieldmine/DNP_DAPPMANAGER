@@ -49,11 +49,10 @@ export async function getLastDirectoryUpdateTimestamp() {
  * Fetches all package names in the custom dappnode directory.
  * [NOTE]: Already sorted by: feat#0, feat#1, dnp#0, dnp#1, dnp#2
  */
-export default async function getDirectory(): Promise<DirectoryDnp[]> {
-  const directory = new web3.eth.Contract(
-    directoryContract.abi,
-    directoryContract.address
-  );
+export default async function getDirectory(
+  address: string
+): Promise<DirectoryDnp[]> {
+  const directory = new web3.eth.Contract(directoryContract.abi, address);
   const numberOfDAppNodePackages = parseInt(
     await directory.methods.numberOfDAppNodePackages().call()
   );

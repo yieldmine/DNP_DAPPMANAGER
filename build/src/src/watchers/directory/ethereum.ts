@@ -10,8 +10,12 @@ import fetchAllVersions from "../../modules/release/apm/fetchAllVersions";
  * - Timestamp is provided by the block time at which the query is done
  *   #### This timestamp is dynamic! Find a better way
  */
-export async function fetchRegistryEthereum(): Promise<RawDirectory> {
-  const directory = await getDirectory();
+export async function fetchRegistryEthereum(
+  address: string
+): Promise<RawDirectory> {
+  await ensureRegistryAvailableEthereum();
+
+  const directory = await getDirectory(address);
   const packages = directory.map(({ name, isFeatured, statusName }) => {
     const dnp: RawDirectoryPackage = {
       // Sources

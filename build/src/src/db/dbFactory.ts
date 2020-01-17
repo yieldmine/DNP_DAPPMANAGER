@@ -59,7 +59,7 @@ export default function dbFactory(dbPath: string) {
    * @param validate Must return a boolean (valid or not) given an item
    */
   /* eslint-disable-next-line @typescript-eslint/explicit-function-return-type */
-  function dynamicKeyValidate<T, K>(
+  function dynamicKey<T, K>(
     keyGetter: (keyArg: K) => string,
     validate: (keyArg: K, value?: T) => boolean
   ) {
@@ -86,7 +86,7 @@ export default function dbFactory(dbPath: string) {
 
   return {
     staticKey,
-    dynamicKeyValidate,
+    dynamicKey,
     clearDb,
     lowLevel: { get, set, del, clearDb }
   };

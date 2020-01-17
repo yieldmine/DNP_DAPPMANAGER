@@ -1,4 +1,4 @@
-import { dynamicKeyValidate } from "./dbCache";
+import { dynamicKey } from "./dbCache";
 import { joinWithDot, stripDots } from "./dbUtils";
 
 const PACKAGE_GETTING_STARTED_SHOW = "package-getting-started-show";
@@ -10,12 +10,12 @@ const keyGetterInstallTime = (dnpName: string): string =>
   joinWithDot(PACKAGE_INSTALL_TIME, stripDots(dnpName));
 const validate = (): boolean => true;
 
-export const packageGettingStartedShow = dynamicKeyValidate<boolean, string>(
+export const packageGettingStartedShow = dynamicKey<boolean, string>(
   keyGetterGettingStartedShow,
   validate
 );
 
-export const packageInstallTime = dynamicKeyValidate<number, string>(
+export const packageInstallTime = dynamicKey<number, string>(
   keyGetterInstallTime,
   validate
 );

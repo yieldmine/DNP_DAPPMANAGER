@@ -9,7 +9,7 @@ const fileTransferPathValidate = (filePath: string): boolean => {
   return typeof filePath === "string";
 };
 
-export const fileTransferPath = dbCache.dynamicKeyValidate<string, string>(
+export const fileTransferPath = dbCache.dynamicKey<string, string>(
   fileTransferPathKeyGetter,
   fileTransferPathValidate
 );
