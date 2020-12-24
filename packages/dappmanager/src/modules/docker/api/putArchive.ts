@@ -27,20 +27,42 @@ export async function dockerPutArchive(
 }
 
 /**
- * Upload single file to container at an absolute path `filePathAbsolute`
+ * Upload files to container at an absolute path `filePathAbsolute`
  * Creates a tar with the file and streams it to the docker HTTP API
  * @param containerNameOrId "DAppNodePackage-geth.dnp.dappnode.eth"
  * @param filePathAbsolute "/a/b/c/sample.yaml"
  * @param fileContents `Buffer.from("config: true")`
  */
-export async function dockerPutArchiveSingleFile(
+export async function dockerPutArchiveFiles(
   containerNameOrId: string,
-  filePathAbsolute: string,
-  fileContents: string | Buffer
+  files: { pathAbsolute: string; contents: string | Buffer }[]
 ): Promise<void> {
   const pack = tar.pack();
 
-  pack.entry({ name: filePathAbsolute }, fileContents);
+  for (const file of files)
+    pack.entry({ name: file.pathAbsolute }, file.contents);
+
+  pack.finalize();
+
+  await dockerPutArchive(containerNameOrId, "/", pack);
+}
+
+/**
+ * Upload streams to container at an absolute path `filePathAbsolute`
+ * Creates a tar with the file and streams it to the docker HTTP API
+ * @param containerNameOrId "DAppNodePackage-geth.dnp.dappnode.eth"
+ * @param filePathAbsolute "/a/b/c/sample.yaml"
+ * @param fileStream Readable stream
+ */
+export async function dockerPutArchiveStreams(
+  containerNameOrId: string,
+  files: { pathAbsolute: string; stream: NodeJS.ReadableStream }[]
+): Promise<void> {
+  const pack = tar.pack();
+
+  for (const file of files)
+    file.stream.pipe(pack.entry({ name: file.pathAbsolute }));
+
   pack.finalize();
 
   await dockerPutArchive(containerNameOrId, "/", pack);

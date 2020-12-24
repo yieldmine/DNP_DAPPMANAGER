@@ -9,7 +9,8 @@ import shell from "../utils/shell";
 import validateBackupArray from "../utils/validateBackupArray";
 import { PackageBackup } from "../types";
 
-const tempTransferDir = params.TEMP_TRANSFER_DIR;
+// ############ TODO
+const tempTransferDir = "TEMP_TRANSFER_DIR";
 
 /**
  * Restore a previous backup of a DNP, from the dataUri provided by the user

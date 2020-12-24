@@ -12,7 +12,8 @@ import shell from "../utils/shell";
 import validateBackupArray from "../utils/validateBackupArray";
 import { PackageBackup } from "../types";
 
-const tempTransferDir = params.TEMP_TRANSFER_DIR;
+// ############ TODO
+const tempTransferDir = "TEMP_TRANSFER_DIR";
 
 /**
  * Does a backup of a DNP and sends it to the client for download.

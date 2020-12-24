@@ -1,42 +1,55 @@
-import fs from "fs";
-import path from "path";
-import crypto from "crypto";
-import params from "../../params";
-import * as db from "../../db";
-import { logs } from "../../logs";
+import Busboy from "busboy";
+import tar from "tar-stream";
 import { wrapHandler } from "../utils";
+import { dockerPutArchive } from "../../modules/docker/api/putArchive";
 
-const tempTransferDir = params.TEMP_TRANSFER_DIR;
+const fileFieldname = "file";
+
+interface Params {
+  containerName: string;
+}
 
 /**
  * Endpoint to upload files.
- * Any file type and size will be accepted
- * A fileId will be provided afterwards to be used in another useful call
  */
-export const fileUpload = wrapHandler(async (req, res) => {
-  if (!req.files || typeof req.files !== "object")
-    return res.status(400).send("Argument files missing");
-  if (Object.keys(req.files).length == 0)
-    return res.status(400).send("No files were uploaded.");
+export const fileUpload = wrapHandler<Params>(async (req, res) => {
+  const containerNameOrId = req.params.containerName;
+  const rootTarPath = (req.query.path as string) || "/";
 
-  const fileId = crypto.randomBytes(32).toString("hex");
-  const filePath = path.join(tempTransferDir, fileId);
+  for await (const chunk of req) {
+    console.log({ chunk });
+  }
 
-  // Use the mv() method to place the file somewhere on your server
-  // The name of the input field (i.e. "file") is used to retrieve the uploaded file
-  const file = Array.isArray(req.files.file)
-    ? req.files.file[0]
-    : req.files.file;
-  file.mv(filePath, err => {
-    if (err) return res.status(500).send(err);
+  // Busboy must consume each file stream before going to the next
+  // On each file either consume or add to the tar pack
+  // Once the form is finished, mark the tar file as finished
+  const busboy = new Busboy({ headers: req.headers });
+  const pack = tar.pack();
 
-    db.fileTransferPath.set(fileId, filePath);
-    res.send(fileId);
-    // Delete the file after 15 minutes
-    setTimeout(() => {
-      fs.unlink(filePath, errFs => {
-        if (errFs) logs.error(`Error deleting file: ${errFs.message}`);
-      });
-    }, 15 * 60 * 1000);
+  // Listen for event when Busboy finds a file to stream.
+  busboy.on("file", (fieldname, file, filename) => {
+    if (fieldname === fileFieldname) {
+      console.log({ filename });
+      pack.entry({ name: filename }, Buffer.from("hhehehe"));
+      file.resume();
+    } else {
+      file.resume();
+    }
+  });
+
+  busboy.on("finish", () => {
+    console.log("Done!");
+    pack.finalize();
+  });
+
+  busboy.on("error", (err: Error) => {
+    pack.destroy(err);
+  });
+
+  // Pipe the HTTP Request into Busboy.
+  req.pipe(busboy);
+
+  await dockerPutArchive(containerNameOrId, rootTarPath, pack, {
+    noOverwriteDirNonDir: true
   });
 });

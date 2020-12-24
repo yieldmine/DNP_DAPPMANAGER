@@ -1,13 +1,21 @@
 import { expect } from "chai";
 import { Writable } from "stream";
-import { docker } from "../../../src/modules/docker/api/docker";
+import fs from "fs";
+import http from "http";
+import express from "express";
+import bodyParser from "body-parser";
+import compression from "compression";
+import FormData from "form-data";
+import fetch from "node-fetch";
+import { docker } from "../../src/modules/docker/api/docker";
 import {
   dockerGetArchive,
   dockerGetArchiveSingleFile,
   dockerGetArchiveSingleFileBuffered
-} from "../../../src/modules/docker/api/getArchive";
-import { dockerInfoArchive } from "../../../src/modules/docker/api/infoArchive";
-import { dockerPutArchiveSingleFile } from "../../../src/modules/docker/api/putArchive";
+} from "../../src/modules/docker/api/getArchive";
+import { dockerInfoArchive } from "../../src/modules/docker/api/infoArchive";
+import { dockerPutArchiveFiles } from "../../src/modules/docker/api/putArchive";
+import { fileUpload } from "../../src/api/routes/fileUpload";
 
 describe("docker / archive put, get", function() {
   const containerName = "DAppNodeTest-file-transfer";
@@ -52,11 +60,9 @@ describe("docker / archive put, get", function() {
 
   describe("Single file", () => {
     it("Should put a file", async () => {
-      await dockerPutArchiveSingleFile(
-        containerName,
-        filePath,
-        Buffer.from(fileContent)
-      );
+      await dockerPutArchiveFiles(containerName, [
+        { pathAbsolute: filePath, contents: Buffer.from(fileContent) }
+      ]);
     });
 
     it("Should get file info", async () => {
@@ -123,6 +129,57 @@ describe("docker / archive put, get", function() {
         fileContent,
         "returned file does not match put file"
       );
+    });
+  });
+
+  describe.only("Upload with API", () => {
+    const afterCallbacks: (() => void)[] = [];
+    afterEach(() => {
+      while (afterCallbacks.length > 0) {
+        const callback = afterCallbacks.pop();
+        if (callback) callback();
+      }
+    });
+
+    it("Upload file", async () => {
+      const app = express();
+      app.use(compression());
+      app.use(bodyParser.json());
+      app.use(bodyParser.text());
+      app.use(bodyParser.urlencoded({ extended: true }));
+
+      const port = 8965;
+      app.post<{ containerName: string }>(
+        "/file-upload/:containerName",
+        fileUpload
+      );
+
+      const server = new http.Server(app);
+
+      await new Promise<void>(resolve => {
+        server.listen(port, () => {
+          resolve();
+        });
+      });
+
+      afterCallbacks.push(() => server.close());
+
+      // Do request
+
+      const form = new FormData();
+      form.append("some_field", "some_value");
+      form.append("file", fs.createReadStream(__filename));
+
+      const url = `http://localhost:${port}/file-upload/${containerName}`;
+
+      console.log(`Requesting ${url}`);
+      const res = await fetch(url, { method: "POST", body: form });
+      const resText = await res.text();
+      if (!res.ok) {
+        throw Error(`${res.statusText}\n${resText}`);
+      }
+
+      console.log("Done", resText);
     });
   });
 });
