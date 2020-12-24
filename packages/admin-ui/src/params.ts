@@ -16,12 +16,13 @@ export const apiUrls = {
 
   // Regular routes
   rpc: urlJoin(apiUrl, "rpc"),
-  upload: urlJoin(apiUrl, "upload"),
-  download: urlJoin(apiUrl, "download"),
+  backupUpload: urlJoin(apiUrl, "backup-upload"),
+  backupDownload: urlJoin(apiUrl, "backup-download"),
+  fileUpload: urlJoin(apiUrl, "file-upload"),
+  fileDownload: urlJoin(apiUrl, "file-download"),
   containerLogs: urlJoin(apiUrl, "container-logs"),
   userActionLogs: urlJoin(apiUrl, "user-action-logs"),
-  globalEnvs: urlJoin(apiUrl, "global-envs"),
-  globalEnvsServerName: urlJoin(apiUrl, "global-envs/SERVER_NAME")
+  globalEnvs: urlJoin(apiUrl, "global-envs")
 };
 // Allow cross-domain cookies
 export const apiTestMode = process.env.REACT_APP_API_TEST;

@@ -13,7 +13,7 @@ const tempTransferDir = params.TEMP_TRANSFER_DIR;
  * Any file type and size will be accepted
  * A fileId will be provided afterwards to be used in another useful call
  */
-export const upload = wrapHandler(async (req, res) => {
+export const fileUpload = wrapHandler(async (req, res) => {
   if (!req.files || typeof req.files !== "object")
     return res.status(400).send("Argument files missing");
   if (Object.keys(req.files).length == 0)

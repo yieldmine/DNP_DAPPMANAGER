@@ -1,5 +1,6 @@
 export * from "./container";
 export * from "./df";
+export * from "./getArchive";
 export * from "./imageRemove";
 export * from "./infoArchive";
 export * from "./listContainers";

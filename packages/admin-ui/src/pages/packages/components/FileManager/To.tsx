@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { api } from "api";
+import { fileUpload } from "api/routes";
 // Components
 import Input from "components/Input";
 import Button from "components/Button";
+import ErrorView from "components/ErrorView";
+import Ok from "components/Ok";
+import ProgressBar from "react-bootstrap/esm/ProgressBar";
 // Utils
-import fileToDataUri from "utils/fileToDataUri";
+import humanFS from "utils/humanFileSize";
 import humanFileSize from "utils/humanFileSize";
-import { shortNameCapitalized as sn } from "utils/format";
-import { withToast } from "components/toast/Toast";
+import { ReqStatus } from "types";
 
-const fileSizeWarning = 1e6;
+interface ProgressStatus {
+  label: string;
+  percent?: number;
+}
 
 export function CopyFileTo({
   containerName,
@@ -20,6 +25,9 @@ export function CopyFileTo({
 }) {
   const [file, setFile] = useState<File>();
   const [toPath, setToPath] = useState("");
+  const [reqStatus, setReqStatus] = useState<ReqStatus<true, ProgressStatus>>(
+    {}
+  );
 
   useEffect(() => {
     if (toPathDefault) setToPath(toPathDefault);
@@ -27,33 +35,31 @@ export function CopyFileTo({
 
   const { name, size } = file || {};
 
+  /**
+   * Upload single file to container
+   */
   async function uploadFile() {
-    if (file)
-      try {
-        const dataUri = await fileToDataUri(file);
-        const filename = name || "";
-        await withToast(
-          () =>
-            api.copyFileTo({
-              containerName,
-              dataUri,
-              filename: name || "",
-              toPath
-            }),
-          {
-            message: `Copying file ${filename} to ${sn(
-              containerName
-            )} ${toPath}...`,
-            onSuccess: `Copied file ${filename} to ${sn(
-              containerName
-            )} ${toPath}`
+    if (!file) return;
+
+    try {
+      setReqStatus({ loading: { label: "Loading..." } });
+
+      await fileUpload(file, { containerName, path: toPath }, e => {
+        const percent = parseFloat((100 * e.fraction).toFixed(2));
+        setReqStatus({
+          loading: {
+            percent: percent,
+            label: `${percent}% ${humanFS(e.loadedBytes)} / ${humanFS(
+              e.totalBytes
+            )}`
           }
-        );
-      } catch (e) {
-        console.error(
-          `Error on copyFileFrom ${containerName} ${toPath}: ${e.stack}`
-        );
-      }
+        });
+      });
+
+      setReqStatus({ result: true });
+    } catch (e) {
+      setReqStatus({ error: e });
+    }
   }
 
   return (
@@ -64,9 +70,9 @@ export function CopyFileTo({
           <input
             type="file"
             className="custom-file-input"
+            disabled={Boolean(reqStatus.loading)}
             onChange={e => {
-              if (e && e.target && e.target.files && e.target.files[0])
-                setFile(e.target.files[0]);
+              if (e?.target?.files) setFile(e.target.files[0]);
             }}
           />
           <label className="custom-file-label" htmlFor="inputGroupFile01">
@@ -75,13 +81,6 @@ export function CopyFileTo({
         </div>
       </div>
 
-      {name && size && size > fileSizeWarning && (
-        <div className="alert alert-secondary">
-          Note that this tool is not meant for large file transfers. Expect
-          unstable behaviour.
-        </div>
-      )}
-
       {/* TO, choose destination path */}
       <Input
         placeholder="Defaults to $WORKDIR/"
@@ -89,11 +88,27 @@ export function CopyFileTo({
         onValueChange={setToPath}
         onEnterPress={uploadFile}
         append={
-          <Button onClick={uploadFile} disabled={!file} variant="dappnode">
+          <Button
+            onClick={uploadFile}
+            disabled={!file || Boolean(reqStatus.loading)}
+            variant="dappnode"
+          >
             Upload
           </Button>
         }
       />
+
+      {reqStatus.result && <Ok ok msg="Uploaded file" />}
+      {reqStatus.error && <ErrorView error={reqStatus.error} red hideIcon />}
+      {reqStatus.loading && (
+        <div>
+          <ProgressBar
+            now={reqStatus.loading.percent || 100}
+            animated={true}
+            label={reqStatus.loading.label || ""}
+          />
+        </div>
+      )}
     </div>
   );
 }

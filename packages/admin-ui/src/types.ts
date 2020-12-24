@@ -12,10 +12,10 @@ export interface WifiStatus {
   isDefault: boolean;
 }
 
-export interface ReqStatus<T = true> {
-  loading?: boolean;
+export interface ReqStatus<Result = true, Loading = boolean> {
+  loading?: Loading;
   error?: Error | string;
-  result?: T;
+  result?: Result;
 }
 
 // Window extension

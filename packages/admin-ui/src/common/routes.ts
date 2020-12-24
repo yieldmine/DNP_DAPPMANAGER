@@ -83,47 +83,6 @@ export interface Routes {
   cleanCache: () => Promise<void>;
 
   /**
-   * Copy file from a DNP and downloaded on the client
-   * @param containerName Name of a docker container
-   * @param fromPath path to copy file from
-   * - If path = path to a file: "/usr/src/app/config.json".
-   *   Downloads and sends that file
-   * - If path = path to a directory: "/usr/src/app".
-   *   Downloads all directory contents, tar them and send as a .tar.gz
-   * - If path = relative path: "config.json".
-   *   Path becomes $WORKDIR/config.json, then downloads and sends that file
-   *   Same for relative paths to directories.
-   * @returns dataUri = "data:application/zip;base64,UEsDBBQAAAg..."
-   */
-  copyFileFrom: (kwargs: {
-    containerName: string;
-    fromPath: string;
-  }) => Promise<string>;
-
-  /**
-   * Copy file to a DNP:
-   * @param containerName Name of a docker container
-   * @param dataUri = "data:application/zip;base64,UEsDBBQAAAg..."
-   * @param filename name of the uploaded file.
-   * - MUST NOT be a path: "/app", "app/", "app/file.txt"
-   * @param toPath path to copy a file to
-   * - If path = path to a file: "/usr/src/app/config.json".
-   *   Copies the contents of dataUri to that file, overwritting it if necessary
-   * - If path = path to a directory: "/usr/src/app".
-   *   Copies the contents of dataUri to ${dir}/${filename}
-   * - If path = relative path: "config.json".
-   *   Path becomes $WORKDIR/config.json, then copies the contents of dataUri there
-   *   Same for relative paths to directories.
-   * - If empty, defaults to $WORKDIR
-   */
-  copyFileTo: (kwargs: {
-    containerName: string;
-    dataUri: string;
-    filename: string;
-    toPath: string;
-  }) => Promise<void>;
-
-  /**
    * Creates a new device with the provided id.
    * Generates certificates and keys needed for OpenVPN.
    * @param id Device id name
@@ -497,8 +456,6 @@ export const routesData: { [P in keyof Routes]: RouteData } = {
   chainDataGet: {},
   changeIpfsTimeout: { log: true },
   cleanCache: {},
-  copyFileFrom: { log: true },
-  copyFileTo: { log: true },
   deviceAdd: { log: true },
   deviceAdminToggle: { log: true },
   deviceCredentialsGet: {},

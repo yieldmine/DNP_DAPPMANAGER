@@ -33,13 +33,13 @@ export interface HttpApiParams
 
 export interface HttpRoutes {
   containerLogs: RequestHandler<{ containerName: string }>;
-  download: RequestHandler<{ fileId: string }>;
+  fileDownload: RequestHandler<{ containerName: string }>;
+  fileUpload: RequestHandler<{ containerName: string }>;
   downloadUserActionLogs: RequestHandler<{}>;
   globalEnvs: RequestHandler<{ name: string }>;
   packageManifest: RequestHandler<{ dnpName: string }>;
   publicPackagesData: RequestHandler<{ containerName: string }>;
   sign: RequestHandler<{}>;
-  upload: RequestHandler<{}>;
 }
 
 /**
@@ -143,12 +143,13 @@ export function startHttpApi({
   // Ping - health check
   app.get("/ping", auth.onlyAdmin, (_, res) => res.send({}));
 
-  // Methods that do not fit into RPC
+  // Admin methods that do not fit into RPC
   // prettier-ignore
   app.get("/container-logs/:containerName", auth.onlyAdmin, routes.containerLogs);
-  app.get("/download/:fileId", auth.onlyAdmin, routes.download);
   app.get("/user-action-logs", auth.onlyAdmin, routes.downloadUserActionLogs);
-  app.post("/upload", auth.onlyAdmin, routes.upload);
+  app.get("/file-download/:containerName", routes.fileDownload);
+  app.post("/file-upload/:containerName", auth.onlyAdmin, routes.fileUpload);
+
   // Open endpoints (no auth)
   app.get("/global-envs/:name?", routes.globalEnvs);
   app.get("/public-packages/:containerName?", routes.publicPackagesData);
