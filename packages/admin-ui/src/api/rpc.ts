@@ -1,4 +1,4 @@
-import io from "socket.io-client";
+import { Socket, io } from "socket.io-client";
 import { Emitter } from "mitt";
 import { mapValues } from "lodash";
 import { Args, RpcPayload, RpcResponse } from "common/transport/types";
@@ -6,7 +6,7 @@ import { subscriptionsFactory } from "common";
 import { IApiRpc } from "./interface";
 import { socketIoUrl } from "params";
 
-let socketGlobal: SocketIOClient.Socket | null = null;
+let socketGlobal: Socket | null = null;
 let apiStarted = false;
 
 export const apiRpc: IApiRpc = {
@@ -52,7 +52,7 @@ export const apiRpc: IApiRpc = {
   }
 };
 
-function setupSocket(): SocketIOClient.Socket {
+function setupSocket(): Socket {
   if (!socketGlobal) {
     /* eslint-disable-next-line no-console */
     console.log("Connecting API with Socket.io to", socketIoUrl);

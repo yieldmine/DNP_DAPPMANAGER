@@ -63,7 +63,7 @@ export function toSocketIoHandler(
     expressHandler(
       (socket.handshake as unknown) as express.Request,
       {} as express.Response,
-      next
+      next as express.NextFunction
     );
   };
 }
