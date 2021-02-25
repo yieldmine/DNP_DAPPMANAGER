@@ -28,8 +28,10 @@ export const apiRpc: IApiRpc = {
     const socket = setupSocket();
 
     socket.on("connect", function(...args: any) {
+      // Wrap socket with try/catch and type routes
       const subscriptions = subscriptionsFactory(socket, subscriptionsLogger);
       mapValues(subscriptions, (handler, route) => {
+        // Re-emit incoming network events to the local in-memory eventBus
         handler.on((...args: any[]) => apiEventBridge.emit(route, ...args));
       });
 

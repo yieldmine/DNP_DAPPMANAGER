@@ -23,7 +23,7 @@ export function wrapHandler<ReqParams extends { [key: string]: any } = {}>(
     try {
       await handler(req, res, next);
     } catch (e) {
-      if (res.headersSent) {
+      if (res.headersSent || !res.status) {
         next(e);
       } else if (e instanceof HttpError) {
         res.status(e.statusCode).send({
