@@ -16,7 +16,7 @@ export const wifi: MockDnp = {
     userSettings: {
       environment: {
         [serviceName]: {
-          SSID: "DAppNodeWIFI",
+          SSID: "YieldMineWIFI",
           WPA_PASSPHRASE: "dappnode"
         }
       }

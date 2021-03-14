@@ -14,7 +14,7 @@ export default function Profile() {
         <div>
           This password is used to authorize admin access to this UI. It
           protects you from Cross Site Scripting (XSS) attacks, and un-wanted
-          access from other users in the DAppNodeWIFI network.
+          access from other users in the YieldMineWIFI network.
         </div>
 
         <ChangePassword />
