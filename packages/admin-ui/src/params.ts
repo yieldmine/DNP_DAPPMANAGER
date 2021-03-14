@@ -32,8 +32,8 @@ export const ERROR_NOT_LOGGED_IN = "NOT_LOGGED_IN";
 export const ERROR_NOT_LOGGED_IN_NO_COOKIE = "NOT_LOGGED_IN_NO_COOKIE";
 
 // WIFI
-export const wifiDefaultSSID = "DAppNodeWIFI";
-export const wifiDefaultWPA_PASSPHRASE = "dappnode";
+export const wifiDefaultSSID = "YieldMineWIFI";
+export const wifiDefaultWPA_PASSPHRASE = "yieldmine";
 export const wifiEnvWPA_PASSPHRASE = "WPA_PASSPHRASE";
 export const wifiEnvSSID = "SSID";
 
